@@ -31,10 +31,11 @@ def txt2img_wrapper(
     subseed: int = -1,
     height: int = 512,
     width: int = 512,
+    enable_hr: bool = False,
     denoising_strength: float = 0.7,
     hr_scale: float = 2.0,
     hr_upscaler: str = "Latent",
-    hr_second_pass_steps: int = 10,
+    hr_second_pass_steps: int = 0,
     controlnets: List[UiControlNetUnit] = [],
 ):
     # sampler index
@@ -48,32 +49,32 @@ def txt2img_wrapper(
         else:
             _controlnets.append(UiControlNetUnit(enabled=False))
 
-    # default args
+    # prepare args
     args = [
         "",
-        "",
-        "",
+        prompt,
+        negative_prompt,
         [],
-        20,
-        0,
+        steps,
+        sampler_index,
         False,
         False,
         1,
         1,
         7,
-        -1.0,
-        -1.0,
+        seed,
+        subseed,
         0,
         0,
         0,
         False,
-        512,
-        512,
-        False,
-        0.7,
-        2,
-        "Latent",
-        0,
+        height,
+        width,
+        enable_hr,
+        denoising_strength,
+        hr_scale,
+        hr_upscaler,
+        hr_second_pass_steps,
         0,
         0,
         0,
@@ -121,22 +122,6 @@ def txt2img_wrapper(
         False,
         50,
     ]
-
-    # update args
-    args[1] = prompt
-    args[2] = negative_prompt
-    args[4] = steps
-    args[5] = sampler_index
-    args[11] = seed
-    args[12] = subseed
-    args[17] = height
-    args[18] = width
-
-    # Hires. fix
-    args[20] = denoising_strength
-    args[21] = hr_scale
-    args[22] = hr_upscaler
-    args[23] = hr_second_pass_steps
 
     images, _, _, _ = txt2img(*args)
     return images
