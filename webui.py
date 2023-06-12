@@ -304,7 +304,8 @@ def initialize_rest(*, reload_script_modules=False):
         if modules.sd_hijack.current_optimizer is None:
             modules.sd_hijack.apply_optimizations()
 
-    Thread(target=load_model).start()
+    # Thread(target=load_model).start()
+    load_model()
 
     shared.reload_hypernetworks()
     startup_timer.record("reload hypernetworks")
