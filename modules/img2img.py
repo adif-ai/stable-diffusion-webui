@@ -158,6 +158,10 @@ def img2img(id_task: str, mode: int, prompt: str, negative_prompt: str, prompt_s
     )
 
     p.scripts = modules.scripts.scripts_img2img
+    # number of controlnet is 4
+    if p.scripts.alwayson_scripts[0].args_from is None:
+        p.scripts.alwayson_scripts[0].args_from = 1
+        p.scripts.alwayson_scripts[0].args_to = 5
     p.script_args = args
 
     if shared.cmd_opts.enable_console_prompts:

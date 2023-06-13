@@ -46,6 +46,10 @@ def txt2img(id_task: str, prompt: str, negative_prompt: str, prompt_styles, step
     )
 
     p.scripts = modules.scripts.scripts_txt2img
+    # number of controlnet is 4
+    if p.scripts.alwayson_scripts[0].args_from is None:
+        p.scripts.alwayson_scripts[0].args_from = 1
+        p.scripts.alwayson_scripts[0].args_to = 5
     p.script_args = args
 
     if cmd_opts.enable_console_prompts:
