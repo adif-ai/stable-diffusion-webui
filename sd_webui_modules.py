@@ -41,8 +41,8 @@ def depth_controlnet(
     module=None,
     weight: float = 1.0,
     processor_res=512,
-    control_mode=ControlMode.BALANCED,
-    resize_mode=ResizeMode.INNER_FIT,
+    control_mode=ControlMode.BALANCED.value,
+    resize_mode=ResizeMode.INNER_FIT.value,
 ):
     # depth controlnet
     model = [s for s in get_models(True) if "depth" in s][0] if model is None else model
@@ -90,8 +90,8 @@ def inpaint_controlnet(
     model=None,
     module=None,
     weight: float = 1.0,
-    control_mode=ControlMode.BALANCED,
-    resize_mode=ResizeMode.INNER_FIT,
+    control_mode=ControlMode.BALANCED.value,
+    resize_mode=ResizeMode.INNER_FIT.value,
 ):
     # Inpaint controlnet
     model = (
@@ -120,8 +120,8 @@ def reference_controlnet(
     module=None,
     style_fidelity=0.5,
     weight: float = 1.0,
-    control_mode=ControlMode.BALANCED,
-    resize_mode=ResizeMode.INNER_FIT,
+    control_mode=ControlMode.BALANCED.value,
+    resize_mode=ResizeMode.INNER_FIT.value,
 ):
     # reference controlnet
     module = (
@@ -265,7 +265,7 @@ def img2img_inpaint_wrapper(
     subseed: int = -1,
     height: int = 512,
     width: int = 512,
-    denoising_strength: float = 0.7,
+    denoising_strength: float = 0.75,
     resize_mode: int = 0,
     controlnets: List[UiControlNetUnit] = [],
 ):
@@ -425,7 +425,7 @@ if __name__ == "__main__":
     )
 
     mask_image = load_image(
-        "https://huggingface.co/datasets/diffusers/test-arrays/resolve/main/stable_diffusion_inpaint/boy_mask.png"
+        "mask_boy2.png"
     )
 
     depth_image = init_image
@@ -441,7 +441,25 @@ if __name__ == "__main__":
             is_depth_map=False,
         ),
         inpaint_controlnet(),
-        reference_controlnet(control_image=reference_image),
+    ]
+
+    images = img2img_inpaint_wrapper(
+        prompt="sunglass boy",
+        init_img=init_image,
+        mask=mask_image,
+        controlnets=controlnets,
+        seed=1,
+    )
+    images[0].save("img2img_depth+inpaint.png")
+
+    # img2img inpaint with multi controlnet
+    controlnets = [
+        inpaint_controlnet(),
+        depth_controlnet(
+            control_image=init_image,
+            is_depth_map=False,
+        ),
+        reference_controlnet(control_image=reference_image, style_fidelity=0.2),
     ]
 
     images = img2img_inpaint_wrapper(
@@ -459,7 +477,7 @@ if __name__ == "__main__":
             control_image=init_image,
             is_depth_map=False,
         ),
-        reference_controlnet(control_image=reference_image),
+        reference_controlnet(control_image=reference_image, style_fidelity=0.1),
     ]
 
     images = txt2img_wrapper(
