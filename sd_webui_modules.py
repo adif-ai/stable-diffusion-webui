@@ -425,7 +425,7 @@ if __name__ == "__main__":
     )
 
     mask_image = load_image(
-        "mask_boy2.png"
+        "https://huggingface.co/datasets/diffusers/test-arrays/resolve/main/stable_diffusion_inpaint/boy_mask.png"
     )
 
     depth_image = init_image
