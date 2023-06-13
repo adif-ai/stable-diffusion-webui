@@ -400,7 +400,23 @@ def img2img_inpaint_wrapper(
 
 
 if __name__ == "__main__":
-    # Specific Stable Diffusion model Load
+    # Prerequisite & execution command
+    """
+    git clone https://github.com/adif-ai/stable-diffusion-webui.git
+    cd stable-diffusion-webui
+    conda create -n webui python=3.8
+    conda activate webui
+    pip install -r requirements.txt
+    pip install git+https://github.com/huggingface/diffusers
+    cd extensions/sd-webui-controlnet/models
+    wget https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11f1p_sd15_depth.pth
+    wget https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11p_sd15_inpaint.pth
+    cd ../../..
+    python launch.py
+    python sd_webui_modules.py
+    """
+
+    # Specific Stable Diffusion model Load (./models/Stable-diffusion)
     # sd_model_load(sd_model_fname="v1-5-pruned-emaonly.safetensors")
 
     # load images
