@@ -52,6 +52,7 @@ def depth_controlnet(
         else module
     )
 
+    control_image = np.array(control_image.convert("RGB"))
     if is_depth_map:
         # [Case 1] control image : depth map image
         controlnet = UiControlNetUnit(
@@ -67,7 +68,6 @@ def depth_controlnet(
         )
     else:
         # [Case 2] control image : original image (unprocessed)
-        control_image = np.array(control_image.convert("RGB"))
         fake_mask = np.zeros(
             (control_image.shape[0], control_image.shape[1], 4), dtype=np.uint8
         )
@@ -408,6 +408,7 @@ if __name__ == "__main__":
     conda activate webui
     pip install -r requirements.txt
     pip install git+https://github.com/huggingface/diffusers
+    pip install controlnet-aux
     cd extensions/sd-webui-controlnet/models
     wget https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11f1p_sd15_depth.pth
     wget https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11p_sd15_inpaint.pth
@@ -470,6 +471,27 @@ if __name__ == "__main__":
         seed=1,
     )
     images[0].save("img2img_depth+inpaint+reference.png")
+
+    # txt2img with depth controlnet
+
+    # extract depth map
+    from controlnet_aux import MidasDetector
+
+    midas = MidasDetector.from_pretrained("lllyasviel/Annotators")
+    depth_image = midas(init_image.resize((512, 512)))
+
+    controlnets = [
+        depth_controlnet(
+            control_image=depth_image,
+            is_depth_map=True,
+        ),
+    ]
+    images = txt2img_wrapper(
+        prompt="sunglass boy",
+        controlnets=controlnets,
+        seed=1,
+    )
+    images[0].save("txt2img_depth.png")
 
     # txt2img with multi controlnet
     controlnets = [
