@@ -431,9 +431,7 @@ if __name__ == "__main__":
 
     depth_image = init_image
 
-    reference_image = load_image(
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Robert_Downey%2C_Jr._2012.jpg/1200px-Robert_Downey%2C_Jr._2012.jpg"
-    )
+    reference_image = init_image
 
     # img2img inpaint with multi controlnet
     controlnets = [
