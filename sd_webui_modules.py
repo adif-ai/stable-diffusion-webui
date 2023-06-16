@@ -85,6 +85,56 @@ def depth_controlnet(
         )
     return controlnet
 
+def normal_controlnet(
+    control_image: PIL.Image,
+    is_normal_map=True,
+    model=None,
+    module=None,
+    weight: float = 1.0,
+    processor_res=512,
+    control_mode=ControlMode.BALANCED.value,
+    resize_mode=ResizeMode.INNER_FIT.value,
+):
+    # normal controlnet
+    model = [s for s in get_models(True) if "normal" in s][0] if model is None else model
+    module = (
+        [s for s in get_modules(True) if "normal_bae" in s][0]
+        if module is None
+        else module
+    )
+
+    control_image = np.array(control_image.convert("RGB"))
+    if is_normal_map:
+        # [Case 1] control image : normal map image
+        controlnet = UiControlNetUnit(
+            enabled=True,
+            image=None,
+            generated_image=control_image,
+            use_preview_as_input=True,
+            model=model,
+            control_mode=control_mode,
+            resize_mode=resize_mode,
+            processor_res=processor_res,
+            weight=weight,
+        )
+    else:
+        # [Case 2] control image : original image (unprocessed)
+        fake_mask = np.zeros(
+            (control_image.shape[0], control_image.shape[1], 4), dtype=np.uint8
+        )
+        fake_mask[:, :, 3] = 255
+        image = {"image": control_image, "mask": fake_mask}
+        controlnet = UiControlNetUnit(
+            enabled=True,
+            image=image,
+            model=model,
+            module=module,
+            control_mode=control_mode,
+            resize_mode=resize_mode,
+            processor_res=processor_res,
+            weight=weight,
+        )
+    return controlnet
 
 def inpaint_controlnet(
     model=None,
@@ -261,6 +311,7 @@ def img2img_inpaint_wrapper(
     negative_prompt: str = "",
     steps: int = 20,
     sampler_index: int = 0,
+    mask_blur: int = 4,
     seed: int = -1,
     subseed: int = -1,
     height: int = 512,
@@ -296,7 +347,7 @@ def img2img_inpaint_wrapper(
         None,
         steps,
         sampler_index,
-        4,
+        mask_blur,
         0,
         1,
         False,
