@@ -312,7 +312,7 @@ def img2img_inpaint_wrapper(
     steps: int = 20,
     sampler_index: int = 0,
     mask_blur: int = 4,
-    inpainting_fill: int = 0,
+    inpainting_fill: int = 2,
     seed: int = -1,
     subseed: int = -1,
     height: int = 512,
