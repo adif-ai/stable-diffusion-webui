@@ -62,6 +62,7 @@ class ScriptPostprocessingRunner:
     def __init__(self):
         self.scripts = None
         self.ui_created = False
+        self.t = 0
 
     def initialize_scripts(self, scripts_data):
         self.scripts = []
@@ -124,8 +125,31 @@ class ScriptPostprocessingRunner:
             script_args = args[script.args_from:script.args_to]
 
             process_args = {}
-            for (name, _component), value in zip(script.controls.items(), script_args):
-                process_args[name] = value
+            if script.controls is not None:
+                for (name, _component), value in zip(
+                    script.controls.items(), script_args
+                ):
+                    process_args[name] = value
+            else:
+                controls = [
+                    [
+                        "upscale_mode",
+                        "upscale_by",
+                        "upscale_to_width",
+                        "upscale_to_height",
+                        "upscale_crop",
+                        "upscaler_1_name",
+                        "upscaler_2_name",
+                        "upscaler_2_visibility",
+                    ],
+                    ["gfpgan_visibility"],
+                    ["codeformer_visibility", "codeformer_weight"],
+                ]
+                control = controls[self.t % 3]
+                self.t += 1
+
+                for name, value in zip(control, script_args):
+                    process_args[name] = value
 
             script.process(pp, **process_args)
 

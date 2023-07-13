@@ -2,6 +2,7 @@ from modules import paths, sd_samplers
 from modules.txt2img import txt2img
 from modules.img2img import img2img
 from modules.sd_models import load_model, CheckpointInfo
+from modules.postprocessing import run_postprocessing
 import modules
 from webui import initialize
 import os
@@ -85,6 +86,7 @@ def depth_controlnet(
         )
     return controlnet
 
+
 def normal_controlnet(
     control_image: PIL.Image,
     is_normal_map=True,
@@ -96,7 +98,9 @@ def normal_controlnet(
     resize_mode=ResizeMode.INNER_FIT.value,
 ):
     # normal controlnet
-    model = [s for s in get_models(True) if "normal" in s][0] if model is None else model
+    model = (
+        [s for s in get_models(True) if "normal" in s][0] if model is None else model
+    )
     module = (
         [s for s in get_modules(True) if "normal_bae" in s][0]
         if module is None
@@ -135,6 +139,7 @@ def normal_controlnet(
             weight=weight,
         )
     return controlnet
+
 
 def inpaint_controlnet(
     model=None,
@@ -503,6 +508,58 @@ def img2img_inpaint_wrapper(
     ]
 
     images, _, _, _ = img2img(*args)
+    return images
+
+
+def upscaler_wrapper(
+    image: PIL.Image,
+    resize=4,
+    upscaler1: int or str = 0,
+    upscaler2: int or str = "None",
+    upscaler2_visibility=0,
+    GFPGAN_visibility=0,
+    CodeFormer_visibility=0,
+    CodeFormer_weight=0,
+):
+    upscalers = [
+        "Lanczos",
+        "Nearest",
+        "ESRGAN_4x",
+        "LDSR",
+        "R-ESRGAN 4x+",
+        "R-ESRGAN 4x+ Anime6B",
+        "ScuNET",
+        "ScuNET PSNR",
+        "SwinIR_4x",
+    ]
+
+    if type(upscaler1) == int:
+        upscaler1 = upscalers[upscaler1]
+
+    if type(upscaler2) == int:
+        upscaler2 = upscalers[upscaler2]
+
+    args = [
+        0,
+        image,
+        None,
+        "",
+        "",
+        True,
+        0,
+        resize,
+        512,
+        512,
+        True,
+        upscaler1,
+        upscaler2,
+        upscaler2_visibility,
+        GFPGAN_visibility,
+        CodeFormer_visibility,
+        CodeFormer_weight,
+        True,
+    ]
+    images, _, _ = run_postprocessing(*args)
     return images
 
 
