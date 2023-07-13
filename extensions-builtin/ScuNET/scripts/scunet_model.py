@@ -145,4 +145,5 @@ def on_ui_settings():
     shared.opts.add_option("SCUNET_tile_overlap", shared.OptionInfo(8, "Tile overlap for SCUNET upscalers.", gr.Slider, {"minimum": 0, "maximum": 64, "step": 1}, section=('upscaling', "Upscaling")).info("Low values = visible seam"))
 
 
-script_callbacks.on_ui_settings(on_ui_settings)
+# script_callbacks.on_ui_settings(on_ui_settings)
+on_ui_settings()
