@@ -45,6 +45,7 @@ tqdm
 einops
 opencv-python
 imageio[ffmpeg]
+pynvml
 # CUDA 11.7 version Check
 torch==1.13.1
 torchvision==0.14.1
