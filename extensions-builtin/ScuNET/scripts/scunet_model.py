@@ -9,7 +9,7 @@ from tqdm import tqdm
 from basicsr.utils.download_util import load_file_from_url
 
 import modules.upscaler
-from modules import devices, modelloader, script_callbacks, errors
+from modules import devices, modelloader, errors
 from scunet_model_arch import SCUNet as net
 
 from modules.shared import opts

@@ -1,4 +1,4 @@
-from modules import paths, sd_samplers
+from modules import sd_samplers
 from modules.txt2img import txt2img
 from modules.img2img import img2img
 from modules.sd_models import load_model, CheckpointInfo
@@ -6,13 +6,13 @@ from modules.postprocessing import run_postprocessing
 import modules
 from webui import initialize
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import List, Union
 import PIL.Image
 import numpy as np
 from diffusers.utils import load_image
-from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
+from modules.processing import StableDiffusionProcessingImg2Img
 from modules.generation_parameters_copypaste import create_override_settings_dict
-from modules.shared import opts, state
+from modules.shared import opts
 import modules.shared as shared
 from scripts.sd_upscale import Script
 
@@ -333,14 +333,14 @@ def txt2img_wrapper(
     hr_scale: float = 2.0,
     hr_upscaler: str = "Latent",
     hr_second_pass_steps: int = 0,
-    controlnets: List[UiControlNetUnit] = [],
+    controlnets: List[UiControlNetUnit] = [],  # noqa: B006
 ):
     # sampler index
     print(f"sampler : {sd_samplers.samplers[sampler_index].name}")
 
     # set max number of controlnets is 4
     _controlnets = list()
-    for i in range(4):
+    for _i in range(4):
         if len(controlnets) > 0:
             _controlnets.append(controlnets.pop(0))
         else:
@@ -439,14 +439,14 @@ def img2img_inpaint_wrapper(
     width: int = 512,
     denoising_strength: float = 0.75,
     resize_mode: int = 0,
-    controlnets: List[UiControlNetUnit] = [],
+    controlnets: List[UiControlNetUnit] = [],  # noqa: B006
 ):
     # sampler index
     print(f"sampler : {sd_samplers.samplers[sampler_index].name}")
 
     # set max number of controlnets is 4
     _controlnets = list()
-    for i in range(4):
+    for _i in range(4):
         if len(controlnets) > 0:
             _controlnets.append(controlnets.pop(0))
         else:
@@ -640,14 +640,14 @@ def img2img_sd_upscale_wrapper(
     overlap: int = 64,
     upscaler_index: Union[str, int] = 7,
     scale_factor: int = 4,
-    controlnets: List[UiControlNetUnit] = [],
+    controlnets: List[UiControlNetUnit] = [],  # noqa: B006
 ):
     # sampler index
     print(f"sampler : {sd_samplers.samplers[sampler_index].name}")
 
     # set max number of controlnets is 4
     _controlnets = list()
-    for i in range(4):
+    for _i in range(4):
         if len(controlnets) > 0:
             _controlnets.append(controlnets.pop(0))
         else:

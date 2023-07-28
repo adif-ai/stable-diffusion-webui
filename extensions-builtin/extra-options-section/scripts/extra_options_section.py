@@ -41,7 +41,7 @@ class ExtraOptionsSection(scripts.Script):
             for name, value in zip(self.setting_names, args):
                 if name not in p.override_settings:
                     p.override_settings[name] = value
-        
+
 
 
 shared.options_templates.update(shared.options_section(('ui', "User interface"), {
