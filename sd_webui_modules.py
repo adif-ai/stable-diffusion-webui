@@ -10,6 +10,11 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import PIL.Image
 import numpy as np
 from diffusers.utils import load_image
+from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
+from modules.generation_parameters_copypaste import create_override_settings_dict
+from modules.shared import opts, state
+import modules.shared as shared
+from scripts.sd_upscale import Script
 
 # extension/sd-webui-controlnet
 from scripts.controlnet_ui.controlnet_ui_group import UiControlNetUnit
@@ -566,7 +571,7 @@ def img2img_inpaint_wrapper(
     return images
 
 
-def upscaler_wrapper(
+def extras_upscaler_wrapper(
     image: PIL.Image,
     resize=4,
     upscaler1: int or str = 0,
@@ -616,6 +621,155 @@ def upscaler_wrapper(
     ]
     images, _, _ = run_postprocessing(*args)
     return images
+
+
+def img2img_sd_upscale_wrapper(
+    init_img: PIL.Image.Image = None,  # (RGBA)
+    prompt: str = "",
+    negative_prompt: str = "",
+    steps: int = 20,
+    sampler_index: int = 0,
+    mask_blur: int = 4,
+    inpainting_fill: int = 2,
+    seed: int = -1,
+    subseed: int = -1,
+    height: int = 512,
+    width: int = 512,
+    denoising_strength: float = 0.1,
+    resize_mode: int = 0,
+    overlap: int = 64,
+    upscaler_index: Union[str, int] = 7,
+    scale_factor: int = 4,
+    controlnets: List[UiControlNetUnit] = [],
+):
+    # sampler index
+    print(f"sampler : {sd_samplers.samplers[sampler_index].name}")
+
+    # set max number of controlnets is 4
+    _controlnets = list()
+    for i in range(4):
+        if len(controlnets) > 0:
+            _controlnets.append(controlnets.pop(0))
+        else:
+            _controlnets.append(UiControlNetUnit(enabled=False))
+
+    override_settings_texts = []
+
+    p = StableDiffusionProcessingImg2Img(
+        sd_model=shared.sd_model,
+        outpath_samples=opts.outdir_samples or opts.outdir_img2img_samples,
+        outpath_grids=opts.outdir_grids or opts.outdir_img2img_grids,
+        prompt=prompt,
+        negative_prompt=negative_prompt,
+        seed=seed,
+        subseed=subseed,
+        sampler_name=sd_samplers.samplers_for_img2img[sampler_index].name,
+        steps=steps,
+        width=width,
+        height=height,
+        init_images=[init_img.convert("RGBA")],
+        mask_blur=mask_blur,
+        inpainting_fill=inpainting_fill,
+        resize_mode=resize_mode,
+        denoising_strength=denoising_strength,
+        styles=[],
+        mask=None,
+        restore_faces=False,
+        tiling=False,
+        n_iter=1,
+        batch_size=1,
+        cfg_scale=7,
+        image_cfg_scale=1.5,
+        subseed_strength=0,
+        seed_resize_from_h=0,
+        seed_resize_from_w=0,
+        seed_enable_extras=False,
+        inpaint_full_res=0,
+        inpaint_full_res_padding=32,
+        inpainting_mask_invert=0,
+        override_settings=create_override_settings_dict(override_settings_texts),
+    )
+
+    # prepare args
+    script_args = [
+        7,      # SD upscale: script index 7
+        _controlnets[0],
+        _controlnets[1],
+        _controlnets[2],
+        _controlnets[3],
+        "<ul>\n<li><code>CFG Scale</code> should be 2 or lower.</li>\n</ul>\n",
+        True,
+        True,
+        "",
+        "",
+        True,
+        50,
+        True,
+        1,
+        0,
+        False,
+        4,
+        0.5,
+        "Linear",
+        "None",
+        '<p style="margin-bottom:0.75em">Recommended settings: Sampling Steps: 80-100, Sampler: Euler a, Denoising strength: 0.8</p>',
+        128,
+        8,
+        ["left", "right", "up", "down"],
+        1,
+        0.05,
+        128,
+        4,
+        0,
+        ["left", "right", "up", "down"],
+        False,
+        False,
+        "positive",
+        "comma",
+        0,
+        False,
+        False,
+        "",
+        '<p style="margin-bottom:0.75em">Will upscale the image by the selected scale factor; use width and height sliders to set tile size</p>',
+        overlap,
+        upscaler_index,
+        scale_factor,
+        1,
+        "",
+        [],
+        0,
+        "",
+        [],
+        0,
+        "",
+        [],
+        True,
+        False,
+        False,
+        False,
+        0,
+        None,
+        None,
+        False,
+        None,
+        None,
+        False,
+        None,
+        None,
+        False,
+        None,
+        None,
+        False,
+        50,
+    ]
+    p.script_args = script_args
+
+    script = Script()
+    # Don't know why
+    _ = script_args[38]
+    processed = script.run(p, _, overlap, upscaler_index, scale_factor)
+
+    return processed
 
 
 if __name__ == "__main__":
