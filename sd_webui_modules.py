@@ -259,6 +259,61 @@ def openpose_controlnet(
     return controlnet
 
 
+def softedge_controlnet(
+    control_image: PIL.Image,
+    is_softedge=True,
+    model=None,
+    module=None,
+    weight: float = 1.0,
+    processor_res=512,
+    control_mode=ControlMode.BALANCED.value,
+    resize_mode=ResizeMode.INNER_FIT.value,
+):
+    # softedge controlnet
+    model = (
+        [s for s in get_models(True) if "softedge" in s][0] if model is None else model
+    )
+    module = (
+        [s for s in get_modules(True) if "softedge_hed" in s][0]
+        if module is None
+        else module
+    )
+
+    control_image = np.array(control_image.convert("RGB"))
+    if is_softedge:
+        # [Case 1] control image : softedge image
+        controlnet = UiControlNetUnit(
+            enabled=True,
+            image=None,
+            generated_image=control_image,
+            use_preview_as_input=True,
+            model=model,
+            control_mode=control_mode,
+            resize_mode=resize_mode,
+            processor_res=processor_res,
+            weight=weight,
+        )
+    else:
+        # [Case 2] control image : original image (unprocessed)
+        fake_mask = np.zeros(
+            (control_image.shape[0], control_image.shape[1], 4), dtype=np.uint8
+        )
+        fake_mask[:, :, 3] = 255
+        image = {"image": control_image, "mask": fake_mask}
+        controlnet = UiControlNetUnit(
+            enabled=True,
+            image=image,
+            model=model,
+            module=module,
+            control_mode=control_mode,
+            resize_mode=resize_mode,
+            processor_res=processor_res,
+            weight=weight,
+        )
+
+    return controlnet
+
+
 def txt2img_wrapper(
     prompt: str = "",
     negative_prompt: str = "",
