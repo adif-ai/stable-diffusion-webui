@@ -566,7 +566,7 @@ def img2img_inpaint_wrapper(
     return images
 
 
-def upscaler_wrapper(
+def extras_upscaler_wrapper(
     image: PIL.Image,
     resize=4,
     upscaler1: int or str = 0,
